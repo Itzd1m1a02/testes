@@ -18,14 +18,13 @@ jobs:
       - name: Instalar Graphviz (executável)
         run: sudo apt-get update && sudo apt-get install -y graphviz
 
-
       - name: Instalar dependências (pylint para pyreverse, biblioteca graphviz)
         run: |
           python -m pip install --upgrade pip
           pip install pylint graphviz
 
       - name: Gerar diagrama de classes
-        run: pyreverse -o png -p TestesClasses testes.py
+        run: pyreverse -o png -p TestesClasses --output-format=dot testes.py
 
       - name: Upload dos artefatos do diagrama
         uses: actions/upload-artifact@v4
