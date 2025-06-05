@@ -3,34 +3,35 @@ name: Gerar Diagrama de Classes
 on:
   push:
     branches:
-      - main # Roda quando um push é feito para a branch 'main'
+      - main
     paths:
-      - '**.py' # Roda se qualquer arquivo Python for alterado
-      - '.github/workflows/gerar_diagrama.yml' # Roda se este workflow for alterado
+      - '**.py'
+      - '.github/workflows/gerar_diagrama.yml'
 
 jobs:
   generate-diagram:
-    runs-on: ubuntu-latest # O ambiente para executar a ação
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout do repositório
-        uses: actions/checkout@v3 # Baixa seu código do GitHub
+        uses: actions/checkout@v3
 
-      - name: Instalar dependências (pylint para pyreverse, graphviz para renderizar)
+      - name: Instalar Graphviz (executável)
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+
+      - name: Instalar dependências (pylint para pyreverse, biblioteca graphviz)
         run: |
           python -m pip install --upgrade pip
           pip install pylint graphviz
 
       - name: Gerar diagrama de classes
-        # pyreverse gera classes.png e packages.png
-        # -p NomeDoProjeto é o nome do projeto no diagrama. Use o nome do seu repositório.
-        # testes.py ou *.py se tiver mais arquivos python
         run: pyreverse -o png -p TestesClasses testes.py
 
       - name: Upload dos artefatos do diagrama
-        uses: actions/upload-artifact@v4 # Este passo publica os arquivos gerados
+        uses: actions/upload-artifact@v4
         with:
-          name: diagramas-de-classes # O nome do pacote de artefatos no GitHub
+          name: diagramas-de-classes
           path: |
             classes.png
-            packages.png # Opcional, se você quiser também o diagrama de pacotes
-          retention-days: 7 # Os artefatos ficarão disponíveis para download por 7 dias
+            packages.png
+          retention-days: 7
