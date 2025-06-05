@@ -143,6 +143,24 @@ class RelogioApp:
         # Atualiza fundo do container
         self.container.config(bg=novo_tema.fundo)
        # testes.py
+class Carro:
+    def __init__(self, marca, modelo):
+        self.marca = marca
+        self.modelo = modelo
+
+    def exibir_info(self):
+        return f"Marca: {self.marca}, Modelo: {self.modelo}"
+
+class Motor:
+    def __init__(self, potencia):
+        self.potencia = potencia
+
+    def ligar(self):
+        return "Motor ligado!"
+
+meu_carro = Carro("Ford", "Focus")
+print(meu_carro.exibir_info())
+# Fim do arquivo - alteracao para acionar o workflow 
 
 if __name__ == "__main__":
     root = tk.Tk()
