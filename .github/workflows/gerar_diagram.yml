@@ -27,7 +27,7 @@ jobs:
         run: pyreverse -o png -p TestesClasses testes.py
 
       - name: Upload dos artefatos do diagrama
-        uses: actions/upload-artifact@v3 # Este passo publica os arquivos gerados
+        uses: actions/upload-artifact@v4 # Este passo publica os arquivos gerados
         with:
           name: diagramas-de-classes # O nome do pacote de artefatos no GitHub
           path: |
