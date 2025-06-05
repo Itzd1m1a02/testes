@@ -144,6 +144,9 @@ class RelogioApp:
         self.container.config(bg=novo_tema.fundo)
        # testes.py
 
+       # Atualiza título da janela
+        self.janela.title(f"Relógio Digital v2.0 - Tema {novo_tema.nome.capitalize()}")
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = RelogioApp(root)
