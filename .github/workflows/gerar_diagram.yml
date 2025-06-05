@@ -24,7 +24,7 @@ jobs:
           pip install pylint graphviz
 
       - name: Gerar diagrama de classes
-        run: pyreverse -o png -p TestesClasses --output-format=dot testes.py
+        run: pyreverse -o png -p TestesClasses testes.py
 
       - name: Upload dos artefatos do diagrama
         uses: actions/upload-artifact@v4
