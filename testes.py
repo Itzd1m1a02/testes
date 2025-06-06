@@ -139,6 +139,7 @@ class RelogioApp:
         
         # Atualiza fundo do container
         self.container.config(bg=novo_tema.fundo)
+        self.container.pack_propagate(False)
 if __name__ == "__main__":
     root = tk.Tk()
     app = RelogioApp(root)
