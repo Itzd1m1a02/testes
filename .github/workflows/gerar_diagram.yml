@@ -1,4 +1,4 @@
-name: CI/CD - Geração de Artefatos e Versionamento
+name: CI/CD - Geração de Artefatos com Gemini e Llama
 
 on:
   push:
@@ -8,75 +8,84 @@ on:
 jobs:
   generate-artifacts:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15  # Aumentado para acomodar duas gerações
 
     # Permissão para o workflow comitar de volta ao repositório
     permissions:
-      contents: write # Permite escrever no repositório
+      contents: write
 
     env:
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # Chave da API Gemini acessível a todos os passos
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}  # Nova chave para Llama
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Importante para o versionamento completo do histórico
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip' # Vai procurar por requirements.txt ou pyproject.toml
+          cache: 'pip'
 
-      - name: Install system dependencies (Graphviz, Java, PlantUML)
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y graphviz default-jre plantuml
 
-      - name: Install Python dependencies (Google Generative AI)
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip
-          pip install google-generativeai
-          # Se você tem um requirements.txt com outras libs, instale aqui
+          pip install google-generativeai openai plantuml
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # O passo "Instalar dependências do projeto" foi consolidado acima para evitar duplicação
+      # ========== GERAÇÃO COM GEMINI ==========
+      - name: Gerar diagrama com Gemini
+        run: python diagrama_gemini.py  # Script para Gemini
 
-      - name: Gerar diagrama de classes com Gemini e PlantUML
-        # O script python/testes.py fará a chamada à API, gerará o .puml e o .png
-        run: python testes.py 
+      - name: Renomear artefatos Gemini
+        run: |
+          mv diagrama_classes.puml diagrama_gemini.puml
+          mv diagrama_classes.png diagrama_gemini.png
 
-      - name: Upload artifacts (Diagramas gerados)
+      # ========== GERAÇÃO COM LLAMA ==========
+      - name: Gerar diagrama com Llama (OpenRouter)
+        run: python diagrama_llama.py  # Script para Llama
+
+      - name: Renomear artefatos Llama
+        run: |
+          mv diagrama_classes.puml diagrama_llama.puml
+          mv diagrama_classes.png diagrama_llama.png
+
+      # ========== ARTEFATOS E PERSISTÊNCIA ==========
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-${{ github.run_id }} # Nome do artefato
+          name: build-artifacts-${{ github.run_id }}
           path: |
-            diagrama_classes.png  # Caminho para o PNG gerado pelo seu script
-            diagrama_classes.puml # Caminho para o PlantUML gerado pelo seu script
+            diagrama_gemini.puml
+            diagrama_gemini.png
+            diagrama_llama.puml
+            diagrama_llama.png
           retention-days: 30
 
       - name: Commit e push dos diagramas gerados
         env:
-          # Use o GITHUB_TOKEN padrão que geralmente tem permissão de escrita
-          # Ou use seu GH_PAT se você o criou e configurou com permissão de repo
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ou GH_PAT se preferir usar seu PAT
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-
-          # Puxa as últimas alterações ANTES de comitar e fazer push
-          # Isso evita o erro 'rejected' por histórico divergente
-          # e garante que o novo artefato seja adicionado a um histórico atualizado.
-          git pull --rebase origin main # Usar --rebase é mais limpo para commits de automação
-
-          git add diagrama_classes.png diagrama_classes.puml # Adiciona os arquivos gerados
-
-          # Verifica se há algo para commitar. '|| true' para não falhar o workflow se não houver mudanças.
-          git commit -m "Auto-generated: Update class diagrams [skip ci]" || echo "Nada para commitar ou diagramas inalterados."
-
-          # O GITHUB_TOKEN é passado via cabeçalho HTTP, não precisa de x-access-token no URL
-          git push
-          # OU, se usar GH_PAT no env:
-          # git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git main
+          git pull --rebase origin main
+          
+          # Adiciona todos os diagramas
+          git add diagrama_gemini.puml diagrama_gemini.png
+          git add diagrama_llama.puml diagrama_llama.png
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Auto-generated: Update Gemini and Llama diagrams [skip ci]"
+            git push
+          else
+            echo "Nenhuma alteração nos diagramas. Skip commit."
+          fi
