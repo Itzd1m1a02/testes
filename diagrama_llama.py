@@ -166,7 +166,7 @@ def save_and_convert_diagram(plantuml_code: str, output_puml: str = "diagrama_cl
 if __name__ == "__main__":
     # Define o caminho do arquivo de código para o "Zoológico Galáctico"
     # Certifique-se de que este arquivo existe no mesmo diretório ou forneça o caminho completo.
-    code_file = "zologico_galactico.py" 
+    code_file = "relogio.py" 
     
     # Você pode criar um arquivo chamado 'zologico_galactico.py' e colar o código lá.
     # Ou, se for usar o relogio.py, mude a linha acima:
