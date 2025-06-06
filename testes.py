@@ -8,7 +8,6 @@ class Tema:
         self.texto = texto
         self.botao_fundo = botao_fundo
         self.botao_texto = botao_texto
-
 class RelogioDigital(tk.Frame):
     def __init__(self, master, tema):
         super().__init__(master, bg=tema.fundo)
@@ -53,7 +52,6 @@ class RelogioDigital(tk.Frame):
             bg=novo_tema.fundo, 
             fg=novo_tema.texto
         )
-
 class GerenciadorTemas:
     def __init__(self):
         self.temas = {
@@ -78,7 +76,6 @@ class GerenciadorTemas:
     def alternar_tema(self):
         self.tema_atual = "escuro" if self.tema_atual == "claro" else "claro"
         return self.obter_tema()
-
 class BotaoTema(tk.Button):
     def __init__(self, master, gerenciador, callback):
         self.gerenciador = gerenciador
@@ -98,7 +95,6 @@ class BotaoTema(tk.Button):
             bg=tema.botao_fundo,
             fg=tema.botao_texto
         )
-
 class RelogioApp:
     def __init__(self, janela):
         self.janela = janela
@@ -142,9 +138,6 @@ class RelogioApp:
         
         # Atualiza fundo do container
         self.container.config(bg=novo_tema.fundo)
-
-
-
 if __name__ == "__main__":
     root = tk.Tk()
     app = RelogioApp(root)

@@ -23,34 +23,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint graphviz
 
-      - name: Verificar arquivos do projeto
-        run: |
-          echo "Listando todos os arquivos .py"
-          find . -name "*.py"
-          echo "Conteúdo completo do projeto:"
-          ls -R
-
       - name: Gerar e Verificar Diagrama
         run: |
-          set -x  # Debug: mostra todos os comandos executados
-
-          # Verifica se pyreverse está disponível
-          which pyreverse || (echo "pyreverse não encontrado!" && exit 1)
-
-          # Lista arquivos antes de rodar o pyreverse
-          echo "ANTES do pyreverse:"
+          set -x
+          which pyreverse
           ls -lha .
-
-          # Rodar pyreverse com flag -f ALL e nome correto do arquivo
           pyreverse -o dot -f ALL -p TestesClasses testes.py
-
-          # Lista arquivos gerados depois
-          echo "DEPOIS do pyreverse:"
           ls -lha .
 
-          # Verifica se os arquivos realmente existem
-          test -f classes.dot || (echo "Erro: classes.dot não foi gerado" && exit 1)
-          test -f packages.dot || (echo "Erro: packages.dot não foi gerado" && exit 1)
+      - name: Renomear arquivos gerados
+        run: |
+          mv classes_TestesClasses.dot classes.dot
+          mv packages_TestesClasses.dot packages.dot
 
       - name: Upload dos artefatos do diagrama (em DOT)
         uses: actions/upload-artifact@v4
