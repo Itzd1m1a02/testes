@@ -34,14 +34,6 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install google-generativeai plantuml
-    
-    - name: Upload diagram as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: class-diagram
-        path: |
-            diagrama_classes.puml
-            diagrama_classes.png
 
     - name: Instalar dependências do projeto
       run: |
@@ -49,3 +41,23 @@ jobs:
 
     - name: Gerar diagrama de classes
       run: python testes.py
+      
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-${{ github.run_id }}
+        path: |
+          artifacts/
+          diagrama_classes.puml
+          diagrama_classes.png
+
+    - name: Commit and push diagrams
+      if: github.ref == 'refs/heads/main'
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@users.noreply.github.com"
+        git add diagrama_classes.puml diagrama_classes.png
+        if [ -n "$(git status --porcelain)" ]; then
+          git commit -m "Auto-generated: Update class diagrams [skip ci]"
+          git push origin main
+        fi
