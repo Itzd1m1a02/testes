@@ -1,0 +1,3 @@
+google-generativeai
+pylint
+graphviz # A biblioteca Python, não o executável
