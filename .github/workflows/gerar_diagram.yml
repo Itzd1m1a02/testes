@@ -1,41 +1,13 @@
-name: Gerar Diagrama de Classes
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - '**.py'
-      - '.github/workflows/gerar_diagrama.yml'
-
-jobs:
-  generate-diagram:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v3
-
-      - name: Instalar Graphviz (executável)
-        run: sudo apt-get update && sudo apt-get install -y graphviz
-
-      - name: Instalar dependências (pylint para pyreverse, biblioteca graphviz)
+- name: Gerar e Verificar Diagrama
         run: |
-          python -m pip install --upgrade pip
-          pip install pylint graphviz
-
-      - name: Gerar e Verificar Diagrama
-        run: |
-          # Verifica se o pyreverse está no PATH (já sabemos que está, mas mantém para debug)
           which pyreverse
-          # Lista o conteúdo do diretório atual ANTES do pyreverse
           echo "Conteúdo da pasta antes do pyreverse:"
           ls -lha .
 
-          # --- MUDANÇA PRINCIPAL AQUI: Chamar pyreverse diretamente ---
-          pyreverse -o dot -p TestesClasses testes.py
-          # -------------------------------------------------------------
+          # --- MUDANÇA AQUI: Usa testes_simples.py ---
+          pyreverse -o dot -p SimplesClasses testes_simples.py
+          # ---------------------------------------------
 
-          # Lista o conteúdo do diretório atual DEPOIS do pyreverse
           echo "Conteúdo da pasta depois do pyreverse:"
           ls -lha .
 
