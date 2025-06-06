@@ -3,7 +3,7 @@ import google.generativeai as genai
 import re
 
 # Carregar chave da API via variável de ambiente
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY_ENV') 
 
 if not GEMINI_API_KEY:
     raise ValueError("Erro: variável de ambiente GEMINI_API_KEY não está definida")
