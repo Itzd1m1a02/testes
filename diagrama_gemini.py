@@ -16,7 +16,7 @@ def extract_plantuml_from_response(response_text: str) -> str:
     match = re.search(pattern, response_text, re.DOTALL)
     return f"@startuml{match.group(1)}@enduml" if match else ""
 
-def generate_class_diagram(code_path: str = "testes.py") -> str:
+def generate_class_diagram(code_path: str = "relogio.py") -> str:
     try:
         with open(code_path, "r") as f:
             code = f.read()
