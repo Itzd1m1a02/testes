@@ -16,7 +16,7 @@ jobs:
 
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      OPENROUTER_API_KEY: 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 # Nova chave para Llama
+      OPENROUTER_API_KEY: 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 # Nova chave para Llama
 
     steps:
       - name: Checkout repository
