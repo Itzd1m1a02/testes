@@ -9,68 +9,81 @@ jobs:
   generate-artifacts:
     runs-on: ubuntu-latest
     timeout-minutes: 10  # Evita execuções muito longas
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Importante para o versionamento
-        
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
         cache: 'pip'
-        
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y graphviz default-jre
-        
+        sudo apt-get install -y graphviz plantuml default-jre # default-jre para o plantuml
+
     - name: Install Python dependencies
+      # Consolidado em um único passo
       run: |
         pip install --upgrade pip
-        pip install google-generativeai plantuml
+        pip install google-generativeai # PlantUML foi instalado via apt-get
+        # Se você tiver um requirements.txt, descomente e adicione aqui:
+        # pip install -r requirements.txt
 
-    #- name: Install Python dependencies
-    #  run: |
-    #    pip install --upgrade pip
-    #    pip install -r requirements.txt
-            
-    - name: Generate class diagram
+    - name: Generate class diagram with Gemini and PlantUML
+      env:
+        # Passa a chave da API como uma variável de ambiente para o script Python
+        GEMINI_API_KEY_ENV: ${{ secrets.GEMINI_API_KEY }}
       run: |
         python -c "
         import os
         import google.generativeai as genai
         import re
+        import sys # Para imprimir erros para stderr
 
-        # Configuração da API
-        GEMINI_API_KEY = "AIzaSyDTN2wVwLueQnJkF_8WnUsNDNagw0m8keM"
+        # Configuração da API - AGORA LIDA DO AMBIENTE
+        GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY_ENV')
 
         if not GEMINI_API_KEY:
-            raise ValueError("Erro: Chave da API Gemini não configurada")
-
+            print('Erro: Chave da API Gemini não configurada!', file=sys.stderr)
+            sys.exit(1) # Sai com erro
+        
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-1.5-flash")  # Modelo mais avançado
+        # Use o modelo mais recente que você deseja
+        model = genai.GenerativeModel('gemini-1.5-flash') 
 
         def extract_plantuml_from_response(response_text: str) -> str:
-            """Extrai o bloco PlantUML da resposta do Gemini"""
-            pattern = r'@startuml(.*?)@enduml'
+            # Padrão flexível para capturar o conteúdo entre @startuml e @enduml
+            # Garante que ele capture o primeiro e o último (DOTALL para multilinhas)
+            pattern = r'@startuml\s*(.*?)\s*@enduml'
             match = re.search(pattern, response_text, re.DOTALL)
-            return f"@startuml{match.group(1)}@enduml" if match else ""
+            if match:
+                return f'@startuml\n{match.group(1).strip()}\n@enduml'
+            else:
+                print('Aviso: Bloco @startuml/@enduml não encontrado na resposta da IA.', file=sys.stderr)
+                return ''
 
-        def generate_class_diagram(code_path: str = "relogio.py") -> str:
+        # Mudar para o nome do seu arquivo Python que contem as classes
+        # Se você usar testes.py, mude aqui:
+        PYTHON_CODE_FILE = 'testes.py' 
+
+        def generate_class_diagram(code_path: str = PYTHON_CODE_FILE) -> str:
             """Gera diagrama de classes em formato PlantUML"""
             try:
-                # Ler código fonte
-                with open(code_path, "r") as f:
+                with open(code_path, 'r') as f:
                     code = f.read()
                 
                 # Prompt otimizado
-                prompt = f"""
+                prompt = f'''
                 Gere um diagrama de classes PlantUML completo e preciso para o seguinte código Python.
                 Inclua todas as classes, atributos, métodos e relações (herança, composição, etc).
                 Use formatação padrão PlantUML e evite explicações textuais extras.
+                A saída deve conter APENAS o bloco @startuml e @enduml.
 
                 Código:
                 ```python
@@ -81,41 +94,61 @@ jobs:
                 @startuml
                 ...código PlantUML...
                 @enduml
-                """
+                '''
                 
-                # Gerar resposta
                 response = model.generate_content(prompt)
                 
-                # Processar resposta
                 if response.text:
-                    return extract_plantuml_from_response(response.text)
+                    plantuml_code = extract_plantuml_from_response(response.text)
+                    if not plantuml_code:
+                        print(f'Erro: Não foi possível extrair o bloco PlantUML da resposta: {response.text}', file=sys.stderr)
+                    return plantuml_code
                 else:
-                    raise ValueError("Resposta vazia do modelo")
+                    raise ValueError('Resposta vazia do modelo Gemini.')
             
             except Exception as e:
-                print(f"Erro na geração do diagrama: {str(e)}")
-                return ""
+                print(f'Erro na geração do diagrama pela IA: {str(e)}', file=sys.stderr)
+                return ''
 
         def save_and_convert_diagram(plantuml_code: str):
-            """Salva e converte o diagrama para PNG"""
+            """Salva e converte o diagrama PlantUML para PNG"""
             try:
+                if not plantuml_code:
+                    print('Erro: Código PlantUML vazio. Não é possível salvar ou converter.', file=sys.stderr)
+                    sys.exit(1) # Sai com erro
+                
                 # Salvar arquivo PlantUML
-                with open("diagrama_classes.puml", "w") as f:
+                with open('diagrama_classes.puml', 'w') as f:
                     f.write(plantuml_code)
                 
-                # Converter para PNG
-                os.system("plantuml diagrama_classes.puml")
-                print("Diagrama gerado com sucesso!")
+                # Converter para PNG usando o executável plantuml (instalado via apt-get)
+                # O comando 'plantuml' está agora no PATH do ambiente
+                result = os.system('plantuml diagrama_classes.puml')
+                if result != 0:
+                    print(f'Erro ao converter PlantUML para PNG. Código de saída: {result}', file=sys.stderr)
+                    sys.exit(1) # Sai com erro
+
+                print('Diagrama .puml e .png gerados com sucesso!')
                 
             except Exception as e:
-                print(f"Erro ao salvar diagrama: {str(e)}")
+                print(f'Erro ao salvar ou converter diagrama: {str(e)}', file=sys.stderr)
+                sys.exit(1) # Sai com erro
 
-        if __name__ == "__main__":
-            # Gerar diagrama a partir do código
+        if __name__ == '__main__':
             plantuml_code = generate_class_diagram()
             
             if plantuml_code:
                 save_and_convert_diagram(plantuml_code)
             else:
-                print("Falha na geração do diagrama")
-            "
+                print('Falha total na geração do diagrama.', file=sys.stderr)
+                sys.exit(1) # Garante que o passo falhe se não gerar nada
+        "
+    
+    - name: Upload generated artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: diagramas-de-classes
+        path: |
+          diagrama_classes.puml # O texto PlantUML
+          diagrama_classes.png  # A imagem PNG
+        retention-days: 30
