@@ -62,4 +62,4 @@ jobs:
 
           git add diagrama_classes.*
           git commit -m "Auto-generated: Update class diagrams [skip ci]" || echo "Nada para commitar"
-          git push https://x-access-token:${GH_TOKEN}@github.com/Itzd1m1a02/testes.git main 
+          git push https://x-access-token:${GH_PAT}@github.com/Itzd1m1a02/testes.git main
