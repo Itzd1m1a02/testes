@@ -3,63 +3,80 @@ name: CI/CD - Geração de Artefatos e Versionamento
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # Permite acionar manualmente
 
 jobs:
   generate-artifacts:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    # Permissão para o workflow comitar de volta ao repositório
+    permissions:
+      contents: write # Permite escrever no repositório
+
     env:
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # Chave da API Gemini acessível a todos os passos
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Importante para o versionamento completo do histórico
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
+          cache: 'pip' # Vai procurar por requirements.txt ou pyproject.toml
 
-      - name: Install system dependencies
+      - name: Install system dependencies (Graphviz, Java, PlantUML)
         run: |
           sudo apt-get update
           sudo apt-get install -y graphviz default-jre plantuml
 
-      - name: Install Python dependencies (Gemini e PlantUML)
+      - name: Install Python dependencies (Google Generative AI)
         run: |
           pip install --upgrade pip
-          pip install google-generativeai plantuml
-
-      - name: Instalar dependências do projeto
-        run: |
+          pip install google-generativeai
+          # Se você tem um requirements.txt com outras libs, instale aqui
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Gerar diagrama de classes
-        run: python testes.py
+      # O passo "Instalar dependências do projeto" foi consolidado acima para evitar duplicação
 
-      - name: Upload artifacts
+      - name: Gerar diagrama de classes com Gemini e PlantUML
+        # O script python/testes.py fará a chamada à API, gerará o .puml e o .png
+        run: python testes.py 
+
+      - name: Upload artifacts (Diagramas gerados)
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-${{ github.run_id }}
+          name: build-artifacts-${{ github.run_id }} # Nome do artefato
           path: |
-            artifacts/
-            diagrama_classes.puml
-            diagrama_classes.png
+            diagrama_classes.png  # Caminho para o PNG gerado pelo seu script
+            diagrama_classes.puml # Caminho para o PlantUML gerado pelo seu script
+          retention-days: 30
 
       - name: Commit e push dos diagramas gerados
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          # Use o GITHUB_TOKEN padrão que geralmente tem permissão de escrita
+          # Ou use seu GH_PAT se você o criou e configurou com permissão de repo
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ou GH_PAT se preferir usar seu PAT
+
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-          git pull origin main
+          # Puxa as últimas alterações ANTES de comitar e fazer push
+          # Isso evita o erro 'rejected' por histórico divergente
+          # e garante que o novo artefato seja adicionado a um histórico atualizado.
+          git pull --rebase origin main # Usar --rebase é mais limpo para commits de automação
 
-          git add diagrama_classes.*
-          git commit -m "Auto-generated: Update class diagrams [skip ci]" || echo "Nada para commitar"
-          git push https://x-access-token:${GH_PAT}@github.com/Itzd1m1a02/testes.git main
+          git add diagrama_classes.png diagrama_classes.puml # Adiciona os arquivos gerados
+
+          # Verifica se há algo para commitar. '|| true' para não falhar o workflow se não houver mudanças.
+          git commit -m "Auto-generated: Update class diagrams [skip ci]" || echo "Nada para commitar ou diagramas inalterados."
+
+          # O GITHUB_TOKEN é passado via cabeçalho HTTP, não precisa de x-access-token no URL
+          git push
+          # OU, se usar GH_PAT no env:
+          # git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git main
