@@ -21,7 +21,7 @@ jobs:
       # Chave da API do OpenRouter para Llama - EXPOSTA DIRETAMENTE AQUI.
       # ATENÇÃO: Esta prática não é recomendada para produção ou repositórios públicos
       # devido a riscos de segurança. SUBSTITUA PELA SUA CHAVE REAL.
-      OPENROUTER_API_KEY: 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
+      OPENROUTER_API_KEY: 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
 
     steps:
       - name: Checkout repository

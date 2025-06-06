@@ -5,21 +5,15 @@ import requests # Importação adicionada
 import json     # Importação adicionada
 
 # --- Configuração da API ---
-# Tenta obter a chave da API da variável de ambiente.
-# É crucial que OPENROUTER_API_KEY esteja definida no ambiente
-# (ex: no GitHub Actions como um secret).
-# O valor hardcoded abaixo é APENAS para testes LOCAIS e deve ser removido em produção.
-OPENROUTER_API_KEY = "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"
+# A chave da API do OpenRouter está diretamente codificada aqui.
+# Lembre-se: esta prática não é recomendada para produção ou repositórios públicos
+# devido a riscos de segurança. Use GitHub Secrets para maior segurança.
+OPENROUTER_API_KEY = "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"
 
-# Exemplo de uso para depuração local (descomente se precisar testar sem definir a env)
-# if not OPENROUTER_API_KEY:
-#     print("ATENÇÃO: OPENROUTER_API_KEY não definida. Usando chave hardcoded (apenas para DEV/TESTE).")
-#     OPENROUTER_API_KEY = "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" # Chave descartável de exemplo
-
-if not OPENROUTER_API_KEY:
-    print("ERRO: OPENROUTER_API_KEY não está configurada como variável de ambiente.")
-    print("Por favor, defina-a (ex: export OPENROUTER_API_KEY='') ou use segredos no GitHub Actions.")
-    sys.exit(1) # Sai se a chave não estiver disponível
+# Esta seção de verificação e erro abaixo é mais útil quando a chave é esperada de uma variável de ambiente.
+# Como a chave está hardcoded, a verificação 'if not OPENROUTER_API_KEY:' não fará com que o script saia
+# se a chave estiver lá. Vou remover o bloco para evitar confusão, já que a chave está fixa.
+# No entanto, se você voltasse a usar os.getenv, ele seria útil.
 
 # --- Funções para Geração de Diagramas ---
 
@@ -34,7 +28,7 @@ def extract_plantuml(response_text: str) -> str:
 def generate_class_diagram(code_path: str = "relogio.py") -> str:
     """
     Gera um diagrama de classes em formato PlantUML a partir do código Python.
-    Por padrão, lê o arquivo 'zologico_galactico.py'.
+    Por padrão, lê o arquivo 'relogio.py'.
     """
     try:
         # Ler código fonte
@@ -121,7 +115,7 @@ def generate_class_diagram(code_path: str = "relogio.py") -> str:
         return ""
     except KeyError as key_err:
         print(f"Erro na estrutura de resposta da API (chave ausente): {key_err}")
-        print(f"Resposta completa: {response_data}")
+        # print(f"Resposta completa: {response_data}") # Descomentar para ver a resposta completa em caso de KeyError
         return ""
     except Exception as e:
         print(f"Erro inesperado na geração do diagrama: {str(e)}")
@@ -164,13 +158,11 @@ def save_and_convert_diagram(plantuml_code: str, output_puml: str = "diagrama_cl
 
 # --- Ponto de Entrada Principal ---
 if __name__ == "__main__":
-    # Define o caminho do arquivo de código para o "Zoológico Galáctico"
-    # Certifique-se de que este arquivo existe no mesmo diretório ou forneça o caminho completo.
+    # Define o caminho do arquivo de código que será analisado.
+    # Por padrão, usa "relogio.py". Para usar o zoológico, mude para "zologico_galactico.py"
+    # (e certifique-se de que o arquivo exista no diretório).
     code_file = "relogio.py" 
-    
-    # Você pode criar um arquivo chamado 'zologico_galactico.py' e colar o código lá.
-    # Ou, se for usar o relogio.py, mude a linha acima:
-    # code_file = "relogio.py"
+    # Ou: code_file = "zologico_galactico.py"
 
     plantuml_code = generate_class_diagram(code_path=code_file)
     
