@@ -16,7 +16,7 @@ jobs:
 
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      OPENROUTER_API_KEY: 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 # Nova chave para Llama
+      #OPENROUTER_API_KEY: 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 # Nova chave para Llama
 
     steps:
       - name: Checkout repository
@@ -51,13 +51,13 @@ jobs:
           mv diagrama_classes.png diagrama_gemini.png
 
       # ========== GERAÇÃO COM LLAMA ==========
-      - name: Gerar diagrama com Llama (OpenRouter)
-        run: python diagrama_llama.py  # Script para Llama
+      #- name: Gerar diagrama com Llama (OpenRouter)
+      #  run: python diagrama_llama.py  # Script para Llama
 
-      - name: Renomear artefatos Llama
-        run: |
-          mv diagrama_classes.puml diagrama_llama.puml
-          mv diagrama_classes.png diagrama_llama.png
+      #- name: Renomear artefatos Llama
+      #  run: |
+      #    mv diagrama_classes.puml diagrama_llama.puml
+      #    mv diagrama_classes.png diagrama_llama.png
 
       # ========== ARTEFATOS E PERSISTÊNCIA ==========
       - name: Upload artifacts
