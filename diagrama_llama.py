@@ -9,7 +9,7 @@ import json     # Importação adicionada
 # É crucial que OPENROUTER_API_KEY esteja definida no ambiente
 # (ex: no GitHub Actions como um secret).
 # O valor hardcoded abaixo é APENAS para testes LOCAIS e deve ser removido em produção.
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_API_KEY = "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"
 
 # Exemplo de uso para depuração local (descomente se precisar testar sem definir a env)
 # if not OPENROUTER_API_KEY:
@@ -18,7 +18,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 if not OPENROUTER_API_KEY:
     print("ERRO: OPENROUTER_API_KEY não está configurada como variável de ambiente.")
-    print("Por favor, defina-a (ex: export OPENROUTER_API_KEY='sua_chave_aqui') ou use segredos no GitHub Actions.")
+    print("Por favor, defina-a (ex: export OPENROUTER_API_KEY='') ou use segredos no GitHub Actions.")
     sys.exit(1) # Sai se a chave não estiver disponível
 
 # --- Funções para Geração de Diagramas ---
@@ -31,7 +31,7 @@ def extract_plantuml(response_text: str) -> str:
         return f"@startuml{match.group(1)}@enduml"
     return ""
 
-def generate_class_diagram(code_path: str = "zologico_galactico.py") -> str:
+def generate_class_diagram(code_path: str = "relogio.py") -> str:
     """
     Gera um diagrama de classes em formato PlantUML a partir do código Python.
     Por padrão, lê o arquivo 'zologico_galactico.py'.
