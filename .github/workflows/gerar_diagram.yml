@@ -3,20 +3,25 @@ name: CI/CD - Geração de Artefatos com Gemini e Llama
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # Permite acionar manualmente
+  workflow_dispatch:   # Permite acionar manualmente
 
 jobs:
   generate-artifacts:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Aumentado para acomodar duas gerações
+    timeout-minutes: 15   # Aumentado para acomodar duas gerações
 
     # Permissão para o workflow comitar de volta ao repositório
     permissions:
       contents: write
 
     env:
+      # Chave da API do Gemini - SEMPRE RECOMENDADO USAR SECRETS
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      #OPENROUTER_API_KEY: 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 # Nova chave para Llama
+      
+      # Chave da API do OpenRouter para Llama - EXPOSTA DIRETAMENTE AQUI.
+      # ATENÇÃO: Esta prática não é recomendada para produção ou repositórios públicos
+      # devido a riscos de segurança. SUBSTITUA PELA SUA CHAVE REAL.
+      OPENROUTER_API_KEY: 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 
 
     steps:
       - name: Checkout repository
@@ -38,26 +43,33 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
-          pip install google-generativeai openai plantuml
+          # 'google-generativeai' para Gemini, 'openai' para compatibilidade OpenRouter,
+          # 'requests' para o novo diagrama_llama.py (direto via requests), 'plantuml' para o Python wrapper.
+          pip install google-generativeai openai requests plantuml
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       # ========== GERAÇÃO COM GEMINI ==========
       - name: Gerar diagrama com Gemini
-        run: python diagrama_gemini.py  # Script para Gemini
+        run: python diagrama_gemini.py   # Script para Gemini
+                                         # (Assumindo que gera 'diagrama_classes.puml' e 'diagrama_classes.png')
 
       - name: Renomear artefatos Gemini
         run: |
-          mv diagrama_classes.puml diagrama_gemini.puml
-          mv diagrama_classes.png diagrama_gemini.png
+          # Verifica se os arquivos foram gerados antes de tentar renomear
+          if [ -f diagrama_classes.puml ]; then mv diagrama_classes.puml diagrama_gemini.puml; fi
+          if [ -f diagrama_classes.png ]; then mv diagrama_classes.png diagrama_gemini.png; fi
 
-      # ========== GERAÇÃO COM LLAMA ==========
-      #- name: Gerar diagrama com Llama (OpenRouter)
-      #  run: python diagrama_llama.py  # Script para Llama
 
-      #- name: Renomear artefatos Llama
-      #  run: |
-      #    mv diagrama_classes.puml diagrama_llama.puml
-      #    mv diagrama_classes.png diagrama_llama.png
+      # ========== GERAÇÃO COM LLAMA (OpenRouter) ==========
+      # Estes passos foram descomentados para ativar a geração do diagrama Llama.
+      - name: Gerar diagrama com Llama (OpenRouter)
+        run: python diagrama_llama.py   # Script para Llama (agora usando 'requests' e lendo do ambiente)
+
+      - name: Renomear artefatos Llama
+        run: |
+          # Os nomes de saída do diagrama_llama.py foram atualizados para serem específicos:
+          if [ -f diagrama_classes_LLAMA.puml ]; then mv diagrama_classes_LLAMA.puml diagrama_llama.puml; fi
+          if [ -f diagrama_classes_LLAMA.png ]; then mv diagrama_classes_LLAMA.png diagrama_llama.png; fi
 
       # ========== ARTEFATOS E PERSISTÊNCIA ==========
       - name: Upload artifacts
@@ -79,10 +91,11 @@ jobs:
           git config --global user.email "actions@github.com"
           git pull --rebase origin main
           
-          # Adiciona todos os diagramas
+          # Adiciona todos os diagramas gerados
           git add diagrama_gemini.puml diagrama_gemini.png
           git add diagrama_llama.puml diagrama_llama.png
           
+          # Verifica se há alterações para commitar
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "Auto-generated: Update Gemini and Llama diagrams [skip ci]"
             git push
