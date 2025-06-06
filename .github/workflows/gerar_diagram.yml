@@ -15,7 +15,6 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v3
 
-      # Mantenha o Graphviz executável por enquanto, caso decidamos renderizar PNG depois
       - name: Instalar Graphviz (executável)
         run: sudo apt-get update && sudo apt-get install -y graphviz
 
@@ -24,17 +23,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint graphviz
 
-      - name: Verificar pyreverse e Conteúdo da Pasta
+      - name: Gerar e Verificar Diagrama
         run: |
-          # Verifica se o pyreverse está no PATH
+          # Verifica se o pyreverse está no PATH (já sabemos que está, mas mantém para debug)
           which pyreverse
           # Lista o conteúdo do diretório atual ANTES do pyreverse
           echo "Conteúdo da pasta antes do pyreverse:"
           ls -lha .
 
-          # --- MUDANÇA PRINCIPAL AQUI: Chamar pyreverse via modulo python ---
-          python -m pylint.pyreverse -o dot -p TestesClasses testes.py
-          # ------------------------------------------------------------------
+          # --- MUDANÇA PRINCIPAL AQUI: Chamar pyreverse diretamente ---
+          pyreverse -o dot -p TestesClasses testes.py
+          # -------------------------------------------------------------
 
           # Lista o conteúdo do diretório atual DEPOIS do pyreverse
           echo "Conteúdo da pasta depois do pyreverse:"
