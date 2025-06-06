@@ -34,6 +34,14 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install google-generativeai plantuml
+    
+    - name: Upload diagram as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: class-diagram
+        path: |
+            diagrama_classes.puml
+            diagrama_classes.png
 
     - name: Instalar dependências do projeto
       run: |
