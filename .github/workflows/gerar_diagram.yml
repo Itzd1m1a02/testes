@@ -43,8 +43,8 @@ jobs:
           # O passo "Instalar dependências do projeto" foi consolidado acima para evitar duplicação
 
       - name: Gerar diagrama de classes com Gemini e PlantUML
-        # O script testes.py fará a chamada à API, gerará o .puml e o .png
-        run: python testes.py
+        # O script relogio.py fará a chamada à API, gerará o .puml e o .png
+        run: python relogio.py
 
       - name: Gerar diagrama de classes sem IA (PlantUML)
         # O script gerador_diagrama.py fará a análise do código e gerará o .puml e o .png
@@ -55,8 +55,8 @@ jobs:
         with:
           name: build-artifacts-${{ github.run_id }} # Nome do artefato
           path: |
-            diagrama_classes.png      # Caminho para o PNG gerado por testes.py
-            diagrama_classes.puml     # Caminho para o PlantUML gerado por testes.py
+            diagrama_classes.png      # Caminho para o PNG gerado por relogio.py
+            diagrama_classes.puml     # Caminho para o PlantUML gerado por relogio.py
             diagrama_classes_manual.png # Caminho para o PNG gerado por gerador_diagrama.py
             diagrama_classes_manual.puml # Caminho para o PlantUML gerado por gerador_diagrama.py
           retention-days: 30
