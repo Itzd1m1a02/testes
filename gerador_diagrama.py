@@ -48,19 +48,18 @@ def parse_python_for_class_diagram(code_path: str) -> str:
                     class_methods.append(f"{visibility}{method_name}()")
                 elif isinstance(item, ast.Assign):
                     # Tenta pegar atributos de classe e atributos de instância no __init__
-                    # Percorre os alvos da atribuição (pode ser "a = b = 1")
                     for target in item.targets:
                         if isinstance(target, ast.Name):
                             # Atributo de classe
                             attr_name = target.id
-                            if f"+{attr_name}" not in class_attributes: # Evita duplicatas se já adicionado
+                            if f"+{attr_name}" not in class_attributes:
                                 class_attributes.append(f"+{attr_name}")
                         elif isinstance(target, ast.Attribute) and \
                              isinstance(target.value, ast.Name) and \
                              target.value.id == 'self':
                             # Atributo de instância dentro de um método (ex: self.name)
                             attr_name = target.attr
-                            if f"+{attr_name}" not in class_attributes: # Evita duplicatas
+                            if f"+{attr_name}" not in class_attributes:
                                 class_attributes.append(f"+{attr_name}")
 
 
@@ -68,11 +67,10 @@ def parse_python_for_class_diagram(code_path: str) -> str:
             class_body_lines = []
             if class_attributes:
                 class_body_lines.extend(sorted(class_attributes))
-                class_body_lines.append("--") # Separador visual para PlantUML
+                class_body_lines.append("--")
             if class_methods:
                 class_body_lines.extend(sorted(class_methods))
 
-            # CORREÇÃO AQUI: Pré-formata o corpo da classe antes de inseri-lo na f-string
             joined_class_body = ';\\n'.join(class_body_lines)
             plantuml_elements.append(f"class {class_name} {{\\n{joined_class_body}\\n}}")
 
@@ -91,7 +89,8 @@ def parse_python_for_class_diagram(code_path: str) -> str:
 
     return full_plantuml
 
-def save_and_convert_diagram(plantuml_code: str, output_puml_file: str = "diagrama_classes_relogio.puml"):
+# ATENÇÃO: AQUI FOI FEITA A MUDANÇA NO NOME DO ARQUIVO DE SAÍDA
+def save_and_convert_diagram(plantuml_code: str, output_puml_file: str = "diagrama_classes_manual.puml"):
     """
     Salva o código PlantUML em um arquivo e tenta convertê-lo em imagem.
     Requer o PlantUML instalado e acessível via PATH.
@@ -108,20 +107,26 @@ def save_and_convert_diagram(plantuml_code: str, output_puml_file: str = "diagra
         print("Tentando gerar o diagrama de imagem com PlantUML...")
         # Certifique-se de que 'plantuml' está no seu PATH ou forneça o caminho completo para o .jar
         os.system(f"plantuml {output_puml_file}")
-        print("Comando de geração de diagrama executado. Verifique o diretório para o arquivo de imagem (ex: .png).")
+
+        # Verifique se o arquivo PNG foi realmente criado após a execução do PlantUML
+        output_png_file = output_puml_file.replace(".puml", ".png")
+        if os.path.exists(output_png_file):
+            print(f"Diagrama de imagem '{output_png_file}' gerado com sucesso.")
+        else:
+            print(f"AVISO: O arquivo de imagem '{output_png_file}' NÃO foi encontrado após a execução do PlantUML.")
+            print("Isso pode indicar um problema com a instalação do Java, PlantUML ou Graphviz.")
+
     except Exception as e:
         print(f"Erro ao salvar ou converter o diagrama: {str(e)}")
 
 if __name__ == "__main__":
-    # --- O arquivo Python a ser analisado ---
     target_file_name = "relogio.py"
 
-    # --- Gerar e Salvar o Diagrama ---
     plantuml_output = parse_python_for_class_diagram(target_file_name)
     if plantuml_output and "Erro: Arquivo não encontrado" not in plantuml_output:
         print("\n--- Código PlantUML Gerado ---")
         print(plantuml_output)
         save_and_convert_diagram(plantuml_output)
     else:
-        print(plantuml_output) # Imprime a mensagem de erro se o arquivo não for encontrado
+        print(plantuml_output)
         print("Falha ao gerar o diagrama PlantUML.")
