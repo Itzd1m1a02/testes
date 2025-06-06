@@ -34,7 +34,7 @@ jobs:
       - name: Renomear arquivos gerados
         run: |
           mv classes_TestesClasses.dot classes.dot
-          mv packages_TestesClasses.dot packages.dot
+          [ -f packages_TestesClasses.dot ] && mv packages_TestesClasses.dot packages.dot || echo "Aviso: packages.dot não foi gerado (sem pacotes)"
 
       - name: Upload dos artefatos do diagrama (em DOT)
         uses: actions/upload-artifact@v4
