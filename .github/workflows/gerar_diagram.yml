@@ -1,15 +1,56 @@
-- name: Gerar e Verificar Diagrama
+name: Gerar Diagrama de Classes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.py'
+      - '.github/workflows/gerar_diagrama.yml'
+
+jobs:
+  generate-diagram:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+
+      - name: Instalar Graphviz (executável)
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Instalar dependências (pylint para pyreverse, biblioteca graphviz)
         run: |
-          which pyreverse
-          echo "Conteúdo da pasta antes do pyreverse:"
+          python -m pip install --upgrade pip
+          pip install pylint graphviz
+
+      - name: Verificar arquivos do projeto
+        run: |
+          echo "Listando todos os arquivos .py"
+          find . -name "*.py"
+          echo "Conteúdo completo do projeto:"
+          ls -R
+
+      - name: Gerar e Verificar Diagrama
+        run: |
+          set -x  # Debug: mostra todos os comandos executados
+
+          # Verifica se pyreverse está disponível
+          which pyreverse || (echo "pyreverse não encontrado!" && exit 1)
+
+          # Lista arquivos antes de rodar o pyreverse
+          echo "ANTES do pyreverse:"
           ls -lha .
 
-          # --- MUDANÇA AQUI: Usa testes_simples.py ---
-          pyreverse -o dot -p SimplesClasses testes_simples.py
-          # ---------------------------------------------
+          # Rodar pyreverse com flag -f ALL e nome correto do arquivo
+          pyreverse -o dot -f ALL -p TestesClasses testes.py
 
-          echo "Conteúdo da pasta depois do pyreverse:"
+          # Lista arquivos gerados depois
+          echo "DEPOIS do pyreverse:"
           ls -lha .
+
+          # Verifica se os arquivos realmente existem
+          test -f classes.dot || (echo "Erro: classes.dot não foi gerado" && exit 1)
+          test -f packages.dot || (echo "Erro: packages.dot não foi gerado" && exit 1)
 
       - name: Upload dos artefatos do diagrama (em DOT)
         uses: actions/upload-artifact@v4
