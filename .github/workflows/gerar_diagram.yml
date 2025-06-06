@@ -15,22 +15,27 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v3
 
-      - name: Instalar Graphviz (executável)
-        run: sudo apt-get update && sudo apt-get install -y graphviz
+      # NÃO PRECISAMOS MAIS INSTALAR O EXECUTÁVEL GRAPHVIZ SE A SAÍDA FOR .dot
+      # - name: Instalar Graphviz (executável)
+      #   run: sudo apt-get update && sudo apt-get install -y graphviz
 
       - name: Instalar dependências (pylint para pyreverse, biblioteca graphviz)
+        # O 'pip install graphviz' pode não ser estritamente necessário para gerar DOT,
+        # mas não custa manter para garantir que as libs Python estejam lá.
         run: |
           python -m pip install --upgrade pip
           pip install pylint graphviz
 
-      - name: Gerar diagrama de classes
-        run: pyreverse -o png -p TestesClasses testes.py
+      - name: Gerar diagrama de classes em formato DOT (Texto)
+        # --- MUDANÇA AQUI: SAÍDA AGORA É .dot ---
+        run: pyreverse -o dot -p TestesClasses testes.py
+        # ----------------------------------------
 
-      - name: Upload dos artefatos do diagrama
+      - name: Upload dos artefatos do diagrama (em DOT)
         uses: actions/upload-artifact@v4
         with:
-          name: diagramas-de-classes
+          name: diagramas-de-classes-dot # Nome do artefato
           path: |
-            classes.png
-            packages.png
+            classes.dot   # O arquivo agora é .dot
+            packages.dot  # O arquivo agora é .dot
           retention-days: 7
