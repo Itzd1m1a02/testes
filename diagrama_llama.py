@@ -4,7 +4,7 @@ from openai import OpenAI
 import sys
 
 # Configuração da API
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY") or "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"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY") or "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"
 
 def extract_plantuml(response_text: str) -> str:
     """Extrai o bloco PlantUML da resposta do modelo"""
@@ -60,7 +60,7 @@ def generate_class_diagram(code_path: str = "relogio.py") -> str:
         
         response_text = completion.choices[0].message.content
         #print(response_text)
-        return extract_plantuml(response_text) # type: ignore
+        return extract_plantuml(response_text)
     
     except Exception as e:
         print(f"Erro na geração do diagrama: {str(e)}")
