@@ -63,3 +63,4 @@ if __name__ == "__main__":
         save_and_convert_diagram(plantuml_code)
     else:
         print("Falha na geração do diagrama.")
+        
