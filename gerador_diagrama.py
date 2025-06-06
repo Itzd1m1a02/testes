@@ -72,7 +72,7 @@ def parse_python_for_class_diagram(code_path: str) -> str:
             if class_methods:
                 class_body_lines.extend(sorted(class_methods))
 
-            plantuml_elements.append(f"class {class_name} {{\\n{';\\n'.join(class_body_lines)}\\n}}")
+            plantuml_elements.append(f"class {class_name} {{\n{'\n'.join(class_body_lines)}\n}}")
 
             # Adiciona relações de herança
             for inherited_class in inherited_classes:
