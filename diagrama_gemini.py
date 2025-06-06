@@ -8,8 +8,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("Erro: variável de ambiente GEMINI_API_KEY não está definida")
 
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+genai.configure(api_key=GEMINI_API_KEY) # type: ignore
+model = genai.GenerativeModel("gemini-2.0-flash") # type: ignore
 
 def extract_plantuml_from_response(response_text: str) -> str:
     pattern = r'@startuml(.*?)@enduml'
