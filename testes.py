@@ -143,6 +143,8 @@ class RelogioApp:
         # Atualiza fundo do container
         self.container.config(bg=novo_tema.fundo)
        # testes.py
+        self.janela.config(bg=novo_tema.fundo)
+        self.janela.title(f"Relógio Digital v2.0 - Tema {novo_tema.nome.capitalize()}")
 
 
 if __name__ == "__main__":
