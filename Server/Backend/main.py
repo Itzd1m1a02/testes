@@ -90,7 +90,7 @@ def processar_cadastro(dados: CadastroSchema, db: Session = Depends(get_db)):
         return {"status": 400, "mensagem": "Eita, esse email ja ta em uso. Tente outro!"}
     
     senha_hash = senha_inf.hash(dados.senha) 
-    cpf_shah = senha_inf.hash(dados.cpf)
+    cpf_shah = senha_inf.hash(dados.cpf) # atual
     
     novo_ze_ruela = UsuarioDB(
         email=dados.email,
