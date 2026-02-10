@@ -57,7 +57,7 @@ class LoginSchema(BaseModel):
 
 app.mount("/static", StaticFiles(directory=frontdir), name="static") 
 
-@app.get("/L")
+@app.get("/")
 async def read_root():
     return FileResponse(os.path.join(frontdir, "Login.html")) 
 
