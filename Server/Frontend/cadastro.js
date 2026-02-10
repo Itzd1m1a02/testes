@@ -33,7 +33,7 @@ formulario.addEventListener('submit', async (event) => {
 
         if (response.ok) {
             alert(resultado.mensagem);
-            window.location.href = "/static/Login.html";
+            window.location.href = "/"; 
         } else {
             alert("Erro no cadastro: " + resultado.mensagem);
         }
