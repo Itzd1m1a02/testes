@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+<script>
+        const token = localStorage.getItem('token');
+        
+        // Se não tiver token, chuta para o login
+        if (!token) {
+            alert("Você não está logado! Saindo...");
+            window.location.href = "/";
+        }
+    </script>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
