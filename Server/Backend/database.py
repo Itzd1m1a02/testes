@@ -14,6 +14,6 @@ class UsuarioDB(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
-    senha = Column(String)
+    senha = Column(String)   # Aqui agora vai umz Hash gigante
     cpf = Column(String)
     nascimento = Column(String)

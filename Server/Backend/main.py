@@ -5,10 +5,13 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 import os
+from passlib.context import CryptContext
 
 from database import maq, LocalConecao, UsuarioDB, Base
 
 app = FastAPI()
+
+senha_inf=CryptContext(schemes=["bcrypt"]) 
 
 basedir= os.path.abspath(os.path.dirname(__file__))
 frontdir= os.path.join(basedir, '../Frontend') 
@@ -23,10 +26,9 @@ def get_db():
     finally:
         db.close()
 
-# PERMISSÃO (CORS): Necessário para o seu HTML falar com o Python
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Em produção, aqui iria apenas o endereço do seu site
+    allow_origins=["*"], 
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -48,7 +50,10 @@ def realizar_login(dados: LoginSchema, db: Session = Depends(get_db)):
     usuario = db.query(UsuarioDB).filter(UsuarioDB.email == dados.email).first()
     if not usuario:
         return {"status": 404, "mensagem": "Quem cargas d'água é esse? Cadastre-se primeiro!"}
-    if usuario.senha != dados.senha:
+    
+    senha_correta = senha_inf.verify(dados.senha, usuario.senha) # Nessa brincadeira, a senha do banco é o hash e a senha do input é a senha normal, ai ele compara os dois
+
+    if not senha_correta:
         return {"status": 401, "mensagem": "Desconfio mas nao posso provar... A senha esta errada"}
     return {"status": 200, "mensagem": "Ola, bem-vindo de volta"}
 
@@ -64,9 +69,11 @@ def processar_cadastro(dados: CadastroSchema, db: Session = Depends(get_db)):
     if usuariojatem:
         return {"status": 400, "mensagem": "Eita, esse email ja ta em uso. Tente outro!"}
     
+    senha_hash = senha_inf.hash(dados.senha) 
+    
     novo_ze_ruela = UsuarioDB(
         email=dados.email,
-        senha=dados.senha, #salva sha depois
+        senha=senha_hash, 
         cpf=dados.cpf,
         nascimento=dados.nascimento
     )
