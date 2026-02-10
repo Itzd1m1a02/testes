@@ -6,18 +6,36 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 import os
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from dotenv import load_dotenv
 
 from database import maq, LocalConecao, UsuarioDB, Base
 
+
+load_dotenv()
+
+cahve_seg=os.getenv("CHAVE_SEG")
+metodo="HS256"
+Timeout_acesso=30 #minutios esse role
+
 app = FastAPI()
 
-senha_inf=CryptContext(schemes=["bcrypt"]) 
+senha_inf=CryptContext(schemes=["bcrypt"], deprecated="auto") 
 
 basedir= os.path.abspath(os.path.dirname(__file__))
 frontdir= os.path.join(basedir, '../Frontend') 
 
 #Se nao tive, cria
 Base.metadata.create_all(bind=maq)
+
+
+def criar_token_acesso(data: dict):
+    para_codificar = data.copy()
+    expira = datetime.utcnow() + timedelta(minutes=Timeout_acesso)
+    para_codificar.update({"exp": expira})
+    token_codificado = jwt.encode(para_codificar, cahve_seg, algorithm=metodo)
+    return token_codificado
 
 def get_db():
     db = LocalConecao()
@@ -55,7 +73,9 @@ def realizar_login(dados: LoginSchema, db: Session = Depends(get_db)):
 
     if not senha_correta:
         return {"status": 401, "mensagem": "Desconfio mas nao posso provar... A senha esta errada"}
-    return {"status": 200, "mensagem": "Ola, bem-vindo de volta"}
+    
+    token_acesso = criar_token_acesso(data={"sub": usuario.email})
+    return {"status": 200, "mensagem": "Ola, bem-vindo de volta","token": token_acesso}
 
 class CadastroSchema(BaseModel):
     email: str
@@ -70,11 +90,12 @@ def processar_cadastro(dados: CadastroSchema, db: Session = Depends(get_db)):
         return {"status": 400, "mensagem": "Eita, esse email ja ta em uso. Tente outro!"}
     
     senha_hash = senha_inf.hash(dados.senha) 
+    cpf_shah = senha_inf.hash(dados.cpf)
     
     novo_ze_ruela = UsuarioDB(
         email=dados.email,
         senha=senha_hash, 
-        cpf=dados.cpf,
+        cpf=cpf_shah,
         nascimento=dados.nascimento
     )
     db.add(novo_ze_ruela)

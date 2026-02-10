@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Page de Teste</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f9;
+      color: #333;
+    }
+
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    nav {
+      background: #333;
+      display: flex;
+      justify-content: center;
+    }
+
+    nav a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      background: #575757;
+    }
+
+    main {
+      padding: 20px;
+      text-align: center;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bem-vindo à Home Page de Teste</h1>
+    <p>Exemplo simples com HTML, CSS e JavaScript</p>
+  </header>
+
+  <nav>
+    <a href="#">Início</a>
+    <a href="#">Sobre</a>
+    <a href="#">Contato</a>
+  </nav>
+
+  <main>
+    <h2>Conteúdo Principal</h2>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate facilis, est magni tenetur quia quo et ratione sit corporis, impedit adipisci. Qui ad, temporibus aliquam nostrum sapiente accusantium cum quaerat?
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Incidunt aspernatur repudiandae error, nemo assumenda aperiam? Illo inventore, vitae, cupiditate cum sequi harum unde expedita eius, in soluta accusantium ipsam amet.
+    Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt ea molestias enim consectetur, cumque cum modi, quaerat ipsum dolore autem tempore? Ipsam libero eligendi qui architecto. Laboriosam mollitia nulla expedita.
+    </p>
+    <button onclick="mostrarMensagem()">Clique aqui</button>
+    <p id="mensagem"></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 - Página de Teste</p>
+  </footer>
+
+  <script>
+    function mostrarMensagem() {
+      document.getElementById("mensagem").innerText = "Você clicou no botão";
+    }
+  </script>
+</body>
+</html>
