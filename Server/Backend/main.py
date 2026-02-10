@@ -9,7 +9,8 @@ from passlib.context import CryptContext
 
 from database import maq, LocalConecao, UsuarioDB, Base
 
-app = FastAPI()
+baseSO = os.path.abspath(os.path.dirname(__file__))
+frontend_path = os.path.join(baseSO, "../Frontend")
 
 senha_inf=CryptContext(schemes=["bcrypt"]) 
 
@@ -39,7 +40,7 @@ class LoginSchema(BaseModel):
 
 app.mount("/static", StaticFiles(directory=frontdir), name="static") 
 
-@app.get("/")
+@app.get("/L")
 async def read_root():
     return FileResponse(os.path.join(frontdir, "Login.html")) 
 
